@@ -25,8 +25,8 @@ ELF_BIN := $(patsubst %.elf,%.bin, $(ELF))
 ELF_DUMP := $(patsubst %.elf,%.dump, $(ELF))
 
 SCBASEDIR=$(BUILD)/../git
-ELF_MSRM7=$(SCBASEDIR)/TestSuite.bin
-ELF_MAP_MSRM7=$(SCBASEDIR)/TestSuite.map
+ELF_MSRM7=$(SCBASEDIR)/TestSuit.bin
+ELF_MAP_MSRM7=$(SCBASEDIR)/TestSuit.map
 
 
 ifeq (,$(findstring clean,$(MAKECMDGOALS))$(findstring compile,$(MAKECMDGOALS)))
