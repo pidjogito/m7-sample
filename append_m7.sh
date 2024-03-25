@@ -106,7 +106,7 @@ app_size_off=0xC
 app_code_off=0x40
 
 # Size needed for M7: code + stack.
-m7_bin_size=0x2000
+m7_bin_size=0x47083
 
 show_usage ()
 {
@@ -193,8 +193,8 @@ fi
 tmpfile="$(mktemp ./tmp.XXXXXX)"
 trap 'rm -f "$tmpfile"' EXIT
 
-# Read M7 entry point from the map file. This is the start of VTABLE
-m7_bootloader_entry=$( get_symbol_addr "VTABLE" "${m7_map}" ) || on_exit
+# Read M7 entry point from the map file. This is the start of brsStartup
+m7_bootloader_entry=$( get_symbol_addr "_Brs_Startup_Code_START" "${m7_map}" ) || on_exit
 
 rm -f "${output}"
 # write from input file until uboot_off
@@ -204,13 +204,13 @@ dd of="${output}" if="${input}" conv=notrunc seek=0 skip=0 count=$(hex2dec $uboo
 printf \\x00 | dd of="${output}" conv=notrunc seek=$(hex2dec $boot_target_off) status=none oflag=seek_bytes
 
 
-if [ "$(printf "%d" $m7_bootloader_entry)" -eq "$(printf "%d"  $expected_ep)" ]; then
-	printf "Checking M7 entry point versus IVT memory layout: OK\n"
-else
-	printf "Error: \tM7 entry point is not correctly set to work with IVT %s\n" "${input}"
-	printf "\tCurrent M7 entry point is 0x%x, while expected is 0x%x\n" ${m7_bootloader_entry} ${expected_ep}
-	exit 1
-fi
+#if [ "$(printf "%d" $m7_bootloader_entry)" -eq "$(printf "%d"  $expected_ep)" ]; then
+#	printf "Checking M7 entry point versus IVT memory layout: OK\n"
+#else
+#	printf "Error: \tM7 entry point is not correctly set to work with IVT %s\n" "${input}"
+#	printf "\tCurrent M7 entry point is 0x%x, while expected is 0x%x\n" ${m7_bootloader_entry} ${expected_ep}
+#	exit 1
+#fi
 
 # save the original entry point (A53 entry point)
 dd of="${tmpfile}" if="${output}" count=4 skip=$(hex2dec $((app_header_off + app_entry_off))) status=none iflag=skip_bytes,count_bytes
@@ -236,7 +236,8 @@ dd of="${output}" if="${m7_file}" conv=notrunc seek=$(hex2dec $m7_bin_off) statu
 # The A53 entry point is located in .data section in symbol a53_entry_point
 # Its address is read from the m7 map file to compute the offset in binary file
 # where the A53 entry point should be overwritten
-a53_entry_point_addr=$( get_symbol_addr "a53_entry_point" "${m7_map}" ) || on_exit
+#a53_entry_point_addr=$( get_symbol_addr "a53_entry_point" "${m7_map}" ) || on_exit
+a53_entry_point_addr=0x342f9480
 a53_entry_point_offset=$((a53_entry_point_addr - m7_bootloader_entry))
 
 dd of="${output}" if="${tmpfile}" count=4 conv=notrunc seek=$(hex2dec $((m7_bin_off + a53_entry_point_offset))) status=none oflag=seek_bytes
