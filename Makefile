@@ -24,6 +24,11 @@ ELF_MAP := $(patsubst %.elf,%.map, $(ELF))
 ELF_BIN := $(patsubst %.elf,%.bin, $(ELF))
 ELF_DUMP := $(patsubst %.elf,%.dump, $(ELF))
 
+SCBASEDIR=$(dirname "$0")
+ELF_MSRM7=$(SCBASEDIR)/TestSuite.bin
+ELF_MAP_MSRM7=$(SCBASEDIR)/TestSuite.map
+
+
 ifeq (,$(findstring clean,$(MAKECMDGOALS))$(findstring compile,$(MAKECMDGOALS)))
 ifeq ("$(wildcard $(A53_BOOTLOADER))","")
 $(error "Please specify the bootloader binary using A53_BOOTLOADER argument.\
@@ -48,7 +53,7 @@ compile: $(BUILD) $(ELF)
 
 $(A53_BOOTLOADER_OUT): $(A53_BOOTLOADER) cleanlinker $(ELF)
 	@printf "  [APP]\t$@ <- $<\n"
-	@$(CURDIR)/append_m7.sh -i $< -b $(ELF_BIN) -m $(ELF_MAP)
+	@$(CURDIR)/append_m7.sh -i $< -b $(ELF_MSRM7) -m $(ELF_MAP_MSRM7)
 
 $(BUILD)/%.ld: %.ld.S
 	@printf "  [CC]\t$@ <- $<\n"
