@@ -24,7 +24,7 @@ ELF_MAP := $(patsubst %.elf,%.map, $(ELF))
 ELF_BIN := $(patsubst %.elf,%.bin, $(ELF))
 ELF_DUMP := $(patsubst %.elf,%.dump, $(ELF))
 
-SCBASEDIR=$(dirname "$0")
+SCBASEDIR=$(BUILD)/../git
 ELF_MSRM7=$(SCBASEDIR)/TestSuite.bin
 ELF_MAP_MSRM7=$(SCBASEDIR)/TestSuite.map
 
