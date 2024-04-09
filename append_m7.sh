@@ -158,33 +158,34 @@ then
 	exit 1
 fi
 
-printf "ivt_header_off   = 0x%x\n" $ivt_header_off
+printf "ivt_header_off   = 0x%x\n" "${ivt_header_off}"
 # offsets for QSPI and SD/eMMC
 boot_target_off=$((ivt_header_off + boot_cfg_off))
-printf "boot_target_off   = 0x%x\n" $boot_target_off
+printf "boot_target_off   = 0x%x\n" "${boot_target_off}"
+
 
 app_header_off=$(get_u32_val "${input}" $((ivt_header_off + app_boot_header_off)))
-printf "app_header_off   = 0x%x\n" $app_header_off
+printf "app_header_off   = 0x%x\n" "${app_header_off}"
 uboot_off=$((app_header_off + app_code_off))
-printf "uboot_off   = 0x%x\n" $uboot_off
+printf "uboot_off   = 0x%x\n" "${uboot_off}"
 # M7 binary offset in the IVT binary
 # M7 binary replaces the U-Boot binary in IVT, while U-Boot is shifted with
 # the M7 size
 m7_bin_off=$uboot_off
-printf "m7_bin_off   = 0x%x\n" $m7_bin_off
+printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
 uboot_off_new=$((uboot_off + m7_bin_size))
-printf "uboot_off_new   = 0x%x\n" $uboot_off_new
+printf "uboot_off_new   = 0x%x\n" "${uboot_off_new}"
 ram_start_orig=$(get_u32_val "${input}" $((app_header_off + app_start_off)))
-printf "ram_start_orig   = 0x%x\n" $ram_start_orig
+printf "ram_start_orig   = 0x%x\n" "${ram_start_orig}"
 ram_start=$((ram_start_orig - m7_bin_size))
-printf "ram_start   = 0x%x\n" $ram_start
+printf "ram_start   = 0x%x\n" "${ram_start}"
 # Align to VTABLE_ALIGN
 expected_ep=$(roundup $ram_start $VTABLE_ALIGN)
-printf "expected_ep   = 0x%x\n" $expected_ep
+printf "expected_ep   = 0x%x\n" "${expected_ep}"
 m7_bin_padding=$((expected_ep - ram_start))
-printf "m7_bin_padding   = 0x%x\n" $m7_bin_padding
+printf "m7_bin_padding   = 0x%x\n" "${m7_bin_padding}"
 m7_bin_off=$((m7_bin_off + m7_bin_padding))
-printf "m7_bin_off   = 0x%x\n" $m7_bin_off
+printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
 if test "${show_expected_ep}"; then
 	printf "0x%x\n" "${expected_ep}"
 	exit 0
@@ -202,7 +203,7 @@ trap 'rm -f "$tmpfile"' EXIT
 
 # Read M7 entry point from the map file. This is the start of VTABLE
 m7_bootloader_entry=$( get_symbol_addr "VTABLE" "${m7_map}" ) || on_exit
-printf "m7_bootloader_entry   = 0x%x\n" $m7_bootloader_entry
+printf "m7_bootloader_entry   = 0x%x\n" "${m7_bootloader_entry}"
 rm -f "${output}"
 # write from input file until uboot_off
 dd of="${output}" if="${input}" conv=notrunc seek=0 skip=0 count=$(hex2dec $uboot_off) status=none iflag=count_bytes
@@ -244,7 +245,7 @@ dd of="${output}" if="${m7_file}" conv=notrunc seek=$(hex2dec $m7_bin_off) statu
 # Its address is read from the m7 map file to compute the offset in binary file
 # where the A53 entry point should be overwritten
 a53_entry_point_addr=$( get_symbol_addr "a53_entry_point" "${m7_map}" ) || on_exit
-printf "a53_entry_point_addr   = 0x%x\n" $a53_entry_point_addr
+printf "a53_entry_point_addr   = 0x%x\n" "${a53_entry_point_addr}"
 a53_entry_point_offset=$((a53_entry_point_addr - m7_bootloader_entry))
 
 dd of="${output}" if="${tmpfile}" count=4 conv=notrunc seek=$(hex2dec $((m7_bin_off + a53_entry_point_offset))) status=none oflag=seek_bytes
