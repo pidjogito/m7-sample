@@ -158,39 +158,49 @@ then
 	exit 1
 fi
 
-#printf "ivt_header_off   = 0x%x\n" "${ivt_header_off}"
+
 # offsets for QSPI and SD/eMMC
 boot_target_off=$((ivt_header_off + boot_cfg_off))
-#printf "boot_target_off\n"
 
-#printf 'boot_target_off   = 0x%x\n' $boot_target_off
 
 app_header_off=$(get_u32_val "${input}" $((ivt_header_off + app_boot_header_off)))
-#printf "app_header_off   = 0x%x\n" "${app_header_off}"
+
 uboot_off=$((app_header_off + app_code_off))
-#printf "uboot_off   = 0x%x\n" "${uboot_off}"
+
 # M7 binary offset in the IVT binary
 # M7 binary replaces the U-Boot binary in IVT, while U-Boot is shifted with
 # the M7 size
 m7_bin_off=$uboot_off
-#printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
+
 uboot_off_new=$((uboot_off + m7_bin_size))
-#printf "uboot_off_new   = 0x%x\n" "${uboot_off_new}"
+
 ram_start_orig=$(get_u32_val "${input}" $((app_header_off + app_start_off)))
-#printf "ram_start_orig   = 0x%x\n" "${ram_start_orig}"
+
 ram_start=$((ram_start_orig - m7_bin_size))
-#printf "ram_start   = 0x%x\n" "${ram_start}"
+
 # Align to VTABLE_ALIGN
 expected_ep=$(roundup $ram_start $VTABLE_ALIGN)
-#printf "expected_ep   = 0x%x\n" "${expected_ep}"
+
 m7_bin_padding=$((expected_ep - ram_start))
-#printf "m7_bin_padding   = 0x%x\n" "${m7_bin_padding}"
+
 m7_bin_off=$((m7_bin_off + m7_bin_padding))
-#printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
+
 if test "${show_expected_ep}"; then
 	printf "0x%x\n" "${expected_ep}"
 	exit 0
 fi
+
+printf "ivt_header_off   = 0x%x\n" $ivt_header_off
+printf 'boot_target_off   = 0x%x\n' $boot_target_off
+printf "app_header_off   = 0x%x\n" "${app_header_off}"
+printf "uboot_off   = 0x%x\n" "${uboot_off}"
+printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
+printf "uboot_off_new   = 0x%x\n" "${uboot_off_new}"
+printf "ram_start_orig   = 0x%x\n" "${ram_start_orig}"
+printf "ram_start   = 0x%x\n" "${ram_start}"
+printf "expected_ep   = 0x%x\n" "${expected_ep}"
+printf "m7_bin_padding   = 0x%x\n" "${m7_bin_padding}"
+printf "m7_bin_off   = 0x%x\n" "${m7_bin_off}"
 
 check_file "${m7_file}"
 check_file "${m7_map}"
