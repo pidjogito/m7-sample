@@ -163,7 +163,7 @@ fi
 boot_target_off=$((ivt_header_off + boot_cfg_off))
 #printf "boot_target_off   = 0x%x\n" "${boot_target_off}"
 
-printf 'boot_target_off   = 0x%x\n' $boot_target_off
+#printf 'boot_target_off   = 0x%x\n' $boot_target_off
 
 app_header_off=$(get_u32_val "${input}" $((ivt_header_off + app_boot_header_off)))
 #printf "app_header_off   = 0x%x\n" "${app_header_off}"
