@@ -161,7 +161,7 @@ fi
 #printf "ivt_header_off   = 0x%x\n" "${ivt_header_off}"
 # offsets for QSPI and SD/eMMC
 boot_target_off=$((ivt_header_off + boot_cfg_off))
-echo $(printf "boot_target_off   = 0x%x\n" "${boot_target_off}")
+printf "boot_target_off   = 0x%x\n"
 
 #printf 'boot_target_off   = 0x%x\n' $boot_target_off
 
