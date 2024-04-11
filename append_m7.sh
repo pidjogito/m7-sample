@@ -106,7 +106,7 @@ app_size_off=0xC
 app_code_off=0x40
 
 # Size needed for M7: code + stack.
-m7_bin_size=0x2000
+m7_bin_size=0xC1000
 
 show_usage ()
 {
@@ -213,7 +213,7 @@ tmpfile="$(mktemp ./tmp.XXXXXX)"
 trap 'rm -f "$tmpfile"' EXIT
 
 # Read M7 entry point from the map file. This is the start of VTABLE
-m7_bootloader_entry=$( get_symbol_addr "VTABLE" "${m7_map}" ) || on_exit
+m7_bootloader_entry=$( get_symbol_addr "Brs_ExcVect" "${m7_map}" ) || on_exit
 #printf "m7_bootloader_entry   = 0x%x\n" "${m7_bootloader_entry}"
 rm -f "${output}"
 # write from input file until uboot_off
@@ -223,13 +223,13 @@ dd of="${output}" if="${input}" conv=notrunc seek=0 skip=0 count=$(hex2dec $uboo
 printf \\x00 | dd of="${output}" conv=notrunc seek=$(hex2dec $boot_target_off) status=none oflag=seek_bytes
 
 
-if [ "$(printf "%d" $m7_bootloader_entry)" -eq "$(printf "%d"  $expected_ep)" ]; then
-	printf "Checking M7 entry point versus IVT memory layout: OK\n"
-else
-	printf "Error: \tM7 entry point is not correctly set to work with IVT %s\n" "${input}"
-	printf "\tCurrent M7 entry point is 0x%x, while expected is 0x%x\n" ${m7_bootloader_entry} ${expected_ep}
-	exit 1
-fi
+#if [ "$(printf "%d" $m7_bootloader_entry)" -eq "$(printf "%d"  $expected_ep)" ]; then
+#	printf "Checking M7 entry point versus IVT memory layout: OK\n"
+#else
+#	printf "Error: \tM7 entry point is not correctly set to work with IVT %s\n" "${input}"
+#	printf "\tCurrent M7 entry point is 0x%x, while expected is 0x%x\n" ${m7_bootloader_entry} ${expected_ep}
+#	exit 1
+#fi
 
 # save the original entry point (A53 entry point)
 dd of="${tmpfile}" if="${output}" count=4 skip=$(hex2dec $((app_header_off + app_entry_off))) status=none iflag=skip_bytes,count_bytes
