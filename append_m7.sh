@@ -213,8 +213,8 @@ tmpfile="$(mktemp ./tmp.XXXXXX)"
 trap 'rm -f "$tmpfile"' EXIT
 
 # Read M7 entry point from the map file. This is the start of VTABLE
-m7_bootloader_entry=$( get_symbol_addr "Brs_ExcVect" "${m7_map}" ) || on_exit
-#printf "m7_bootloader_entry   = 0x%x\n" "${m7_bootloader_entry}"
+#m7_bootloader_entry=$( get_symbol_addr "Brs_ExcVect" "${m7_map}" ) || on_exit
+m7_bootloader_entry=872415232
 rm -f "${output}"
 # write from input file until uboot_off
 dd of="${output}" if="${input}" conv=notrunc seek=0 skip=0 count=$(hex2dec $uboot_off) status=none iflag=count_bytes
@@ -255,7 +255,8 @@ dd of="${output}" if="${m7_file}" conv=notrunc seek=$(hex2dec $m7_bin_off) statu
 # The A53 entry point is located in .data section in symbol a53_entry_point
 # Its address is read from the m7 map file to compute the offset in binary file
 # where the A53 entry point should be overwritten
-a53_entry_point_addr=$( get_symbol_addr "a53_entry_point" "${m7_map}" ) || on_exit
+#a53_entry_point_addr=$( get_symbol_addr "a53_entry_point" "${m7_map}" ) || on_exit
+a53_entry_point_addr=$(m7_bootloader_entry)+$(m7_bin_size)
 #printf "a53_entry_point_addr   = 0x%x\n" "${a53_entry_point_addr}"
 a53_entry_point_offset=$((a53_entry_point_addr - m7_bootloader_entry))
 
