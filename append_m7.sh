@@ -106,7 +106,10 @@ app_size_off=0xC
 app_code_off=0x40
 
 # Size needed for M7: code + stack.
-m7_bin_size=0xC1000
+#m7_bin_size=0xC1000
+
+
+
 
 show_usage ()
 {
@@ -177,13 +180,15 @@ uboot_off_new=$((uboot_off + m7_bin_size))
 ram_start_orig=$(get_u32_val "${input}" $((app_header_off + app_start_off)))
 
 ram_start=$((ram_start_orig - m7_bin_size))
-
+ram_start=872415232
+ram_start=872448000
 # Align to VTABLE_ALIGN
 expected_ep=$(roundup $ram_start $VTABLE_ALIGN)
 
 m7_bin_padding=$((expected_ep - ram_start))
 
-m7_bin_off=$((m7_bin_off + m7_bin_padding))
+#m7_bin_off=$((m7_bin_off + m7_bin_padding))
+m7_bin_off=0x1240
 
 if test "${show_expected_ep}"; then
 	printf "0x%x\n" "${expected_ep}"
@@ -214,7 +219,8 @@ trap 'rm -f "$tmpfile"' EXIT
 
 # Read M7 entry point from the map file. This is the start of VTABLE
 #m7_bootloader_entry=$( get_symbol_addr "Brs_ExcVect" "${m7_map}" ) || on_exit
-m7_bootloader_entry=872415232
+m7_bootloader_entry=872415296
+m7_bootloader_entry=872448064
 rm -f "${output}"
 # write from input file until uboot_off
 dd of="${output}" if="${input}" conv=notrunc seek=0 skip=0 count=$(hex2dec $uboot_off) status=none iflag=count_bytes
@@ -242,11 +248,24 @@ int2bin $ram_start | dd of="${output}" bs=1 conv=notrunc seek=$(hex2dec $((app_h
 
 # read the original app code size from IVT header
 blob_size=$(get_u32_val "${output}" $((app_header_off + app_size_off)))
+
+printf 'App code size    = 0x%x\n' $blob_size
+printf 'bin size    = %s\n' $m7_bin_size
+
+m7_du_str=$(du -sh --block=1 ${m7_file})
+m7_sizee=$(grep -oE '^\s*[0-9]+' <<< ${m7_du_str})
+
+printf "m7_du_str    = %s\n" "${m7_du_str}"
+printf "m7_sizee    = %s\n" "${m7_sizee}"
+printf 'Hex m7 size   = 0x%x\n' $m7_sizee
+m7_bin_size=$(grep -oE '^\s*[0-9]+' <<< $(du -sh --block=1 ${m7_file})) 
+
 # update the size adding the newly added M7 binary size
 # Note: the size should not be computed based on binary (u-boot.bin or fip.bin) size. This works for
 # U-Boot, but not for fip.bin where only BL2 size is counted in IVT header
 blob_size=$((blob_size + m7_bin_size))
 int2bin $blob_size | dd of="${output}" bs=1 conv=notrunc seek=$(hex2dec $((app_header_off + app_size_off))) status=none
+printf 'App code size    = 0x%x\n' $blob_size
 
 # write M7 bootloader
 dd of="${output}" if="${m7_file}" conv=notrunc seek=$(hex2dec $m7_bin_off) status=none oflag=seek_bytes
@@ -261,9 +280,12 @@ a53_entry_point_addr=$(m7_bootloader_entry)+$(m7_bin_size)
 a53_entry_point_offset=$((a53_entry_point_addr - m7_bootloader_entry))
 
 dd of="${output}" if="${tmpfile}" count=4 conv=notrunc seek=$(hex2dec $((m7_bin_off + a53_entry_point_offset))) status=none oflag=seek_bytes
-
+#uboot_off_new=3130832
+uboot_off_new=3116480
+uboot_off_new=3096928
 # write u-boot from original file to the new offset
 dd of="${output}" if="${input}" conv=notrunc seek=$(hex2dec $uboot_off_new) skip=$(hex2dec $uboot_off) status=none oflag=seek_bytes iflag=skip_bytes
+
 
 
 printf 'M7 Entry point   = 0x%x\n' $m7_bootloader_entry
