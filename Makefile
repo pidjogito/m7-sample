@@ -24,10 +24,11 @@ ELF_MAP := $(patsubst %.elf,%.map, $(ELF))
 ELF_BIN := $(patsubst %.elf,%.bin, $(ELF))
 ELF_DUMP := $(patsubst %.elf,%.dump, $(ELF))
 
-SCBASEDIR=$(BUILD)/../git
-ELF_MSRM7=$(SCBASEDIR)/TestSuit.bin
-ELF_MAP_MSRM7=$(SCBASEDIR)/TestSuit.map
-
+SCBASEDIR=$(M7_BASE_DIR)
+MSRM7_NAME=$(M7_BIN_NAME)
+MSRM7_MAP_NAME=$(M7_MAP_NAME)
+ELF_MSRM7=$(SCBASEDIR)/$(MSRM7_NAME)
+ELF_MAP_MSRM7=$(SCBASEDIR)/$(MSRM7_MAP_NAME)
 
 ifeq (,$(findstring clean,$(MAKECMDGOALS))$(findstring compile,$(MAKECMDGOALS)))
 ifeq ("$(wildcard $(A53_BOOTLOADER))","")
